@@ -1,0 +1,275 @@
+ <section class="slots-section">
+    <h2>🎰 Популярные слоты</h2>
+    <p class="slots-subtitle">
+        Выбери игру и попробуй демоверсию
+    </p>
+    <input
+        type="text"
+        id="slotSearch"
+        placeholder="🔍 Поиск игры..."
+        oninput="renderSlots()"
+    >
+    <div class="providers" id="providers"></div>
+    <div class="slots-grid" id="slotsGrid"></div>
+    <p class="demo-note">
+        Демо-каталог. Реальные игры и денежные ставки
+        не подключены.
+    </p>
+</section>
+<style>
+.slots-section {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 24px;
+    color: white;
+    background: #0d1510;
+    border: 1px solid #b99a3b;
+    border-radius: 18px;
+}
+.slots-section h2 {
+    color: #f5d76e;
+    text-align: center;
+    font-size: 30px;
+}
+.slots-subtitle {
+    text-align: center;
+    color: #aaa;
+}
+#slotSearch {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin: 24px 0;
+    border-radius: 10px;
+    border: 1px solid #48584b;
+    background: #17221a;
+    color: white;
+    font-size: 16px;
+}
+.providers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+.provider-btn {
+    padding: 10px 15px;
+    border: 1px solid #6c623c;
+    border-radius: 8px;
+    background: #1b281e;
+    color: #f5d76e;
+    cursor: pointer;
+}
+.provider-btn.active {
+    background: #c9a227;
+    color: #111;
+}
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+.slot-card {
+    overflow: hidden;
+    border-radius: 13px;
+    background: #19251d;
+    border: 1px solid #344738;
+}
+.slot-cover {
+    height: 135px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 55px;
+    background: radial-gradient(circle, #435c36, #152018);
+}
+.slot-info {
+    padding: 13px;
+}
+.slot-title {
+    font-weight: bold;
+    margin-bottom: 7px;
+}
+.slot-provider {
+    color: #b8a65e;
+    font-size: 12px;
+    min-height: 28px;
+}
+.play-demo {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border: 0;
+    border-radius: 7px;
+    background: #c9a227;
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+}
+.demo-note {
+    color: #999;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 25px;
+}
+@media (max-width: 750px) {
+    .slots-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 380px) {
+    .slots-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+<script>
+const slotGames = [
+    {
+        name: "Sweet Bonanza",
+        provider: "Pragmatic Play",
+        icon: "🍬"
+    },
+    {
+        name: "Gates of Olympus",
+        provider: "Pragmatic Play",
+        icon: "⚡"
+    },
+    {
+        name: "Big Bass Bonanza",
+        provider: "Pragmatic Play",
+        icon: "🐟"
+    },
+    {
+        name: "The Dog House",
+        provider: "Pragmatic Play",
+        icon: "🐶"
+    },
+    {
+        name: "Book of Ra",
+        provider: "Endorphina",
+        icon: "📕"
+    },
+    {
+        name: "Lucky Streak",
+        provider: "Endorphina",
+        icon: "🍀"
+    },
+    {
+        name: "Reactoonz",
+        provider: "Play'n GO",
+        icon: "👾"
+    },
+    {
+        name: "Book of Dead",
+        provider: "Play'n GO",
+        icon: "🏺"
+    },
+    {
+        name: "Fire in the Hole",
+        provider: "Nolimit City",
+        icon: "💣"
+    },
+    {
+        name: "Mental",
+        provider: "Nolimit City",
+        icon: "🧠"
+    },
+    {
+        name: "Starburst",
+        provider: "NetEnt",
+        icon: "💎"
+    },
+    {
+        name: "Gonzo's Quest",
+        provider: "NetEnt",
+        icon: "🗿"
+    },
+    {
+        name: "Legacy of Dead",
+        provider: "Play'n GO",
+        icon: "🏛️"
+    },
+    {
+        name: "Fruit Party",
+        provider: "Pragmatic Play",
+        icon: "🍉"
+    },
+    {
+        name: "Gem Rocks",
+        provider: "Endorphina",
+        icon: "💎"
+    },
+    {
+        name: "Golden Genie",
+        provider: "Демо-студия",
+        icon: "🧞"
+    }
+];
+let selectedProvider = "Все";
+function renderProviders() {
+    const providers = [
+        "Все",
+        ...new Set(slotGames.map(game => game.provider))
+    ];
+    document.getElementById("providers").innerHTML =
+        providers.map(provider => `
+            <button
+                class="provider-btn ${
+                    selectedProvider === provider ? "active" : ""
+                }"
+                onclick="selectProvider('${provider}')"
+            >
+                ${provider}
+            </button>
+        `).join("");
+}
+function selectProvider(provider) {
+    selectedProvider = provider;
+    renderProviders();
+    renderSlots();
+}
+function renderSlots() {
+    const query = document.getElementById("slotSearch")
+        .value.toLowerCase().trim();
+    const filtered = slotGames.filter(game => {
+        const matchesProvider =
+            selectedProvider === "Все" ||
+            game.provider === selectedProvider;
+        const matchesSearch =
+            game.name.toLowerCase().includes(query) ||
+            game.provider.toLowerCase().includes(query);
+        return matchesProvider && matchesSearch;
+    });
+    document.getElementById("slotsGrid").innerHTML =
+        filtered.length
+            ? filtered.map((game, index) => `
+                <article class="slot-card">
+                    <div class="slot-cover">${game.icon}</div>
+                    <div class="slot-info">
+                        <div class="slot-title">${game.name}</div>
+                        <div class="slot-provider">
+                            ${game.provider}
+                        </div>
+                        <button
+                            class="play-demo"
+                            onclick="openDemo('${game.name.replace(/'/g, "\\'")}')"
+                        >
+                            Играть в демо
+                        </button>
+                    </div>
+                </article>
+            `).join("")
+            : "<p>Игры не найдены.</p>";
+}
+function openDemo(name) {
+    alert(
+        "Выбрана игра: " + name +
+        "\n\nЭто демонстрационная карточка. " +
+        "Для запуска настоящей игры требуется " +
+        "официальная интеграция с провайдером."
+    );
+}
+renderProviders();
+renderSlots();
+</script>
